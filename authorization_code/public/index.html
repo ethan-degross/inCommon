@@ -72,7 +72,8 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script>
-      (function() {
+    var songObject1, songObject2, songObject3, totalSongs = 0
+    var songListArray = []
 
         /**
          * Obtains parameters from the hash of the URL
@@ -129,22 +130,19 @@
               $('#login').show();
               $('#loggedin').hide();
           }
-          //test
+
           $.ajax({
-               url: 'https://api.spotify.com/v1/me/tracks?offset=0&limit=20',
+               url: 'https://api.spotify.com/v1/me/tracks?offset=0&limit=50', //changing the offset to 10 and the limit to 20, this URL will give you the next set of 10 songs
                headers: {
                    'Authorization': 'Bearer ' + access_token
                },
                success: function(response) {
-                 console.log(response)
+                 //console.log(response)
 
-                 var counter = 0
-                 //$('#test-output').html(JSON.stringify(response.items[counter].track.duration_ms))
-
-
-
-                 for(var i = 0; i < 10; i++){
-                  var totalSongs = response.total,
+                 for(var i = 0; i < 50; i++){
+                  totalSongs = response.total,
+                  trackIDFull = response.items[i].track.uri,
+                  trackID = trackIDFull.substring(14),
                   trackName = response.items[i].track.name,
                   artistName = response.items[i].track.album.artists[0].name,
                   albumName = response.items[i].track.album.name,
@@ -155,26 +153,52 @@
                   songDuration =  (songDuration_s == 60 ? (songDuration_m + 1) + ":00" : songDuration_m + ":" + (songDuration_s < 10 ? '0' : '') + songDuration_s),//creates human readable time, and manually adds "0" in :09, and turns ":60" into +1 minute
                   songPopularity = response.items[i].track.popularity,
                   songLink = response.items[i].track.external_urls.spotify,
-                  songObject = (i+1) + ' of ' + totalSongs + '<br>' + 'Track: ' + trackName + '<br>' + 'Artist: ' + artistName + '<br>' + 'Album: '+ albumName + '<br>' + 'Date Added: ' + dateAdded + '<br>' + 'Duration: ' + songDuration + '<br>' + 'Popularity: ' + songPopularity + '<br>' + 'Link: ' +  "<a href=" + songLink + ">link</a>" + '<br><br>'
+                  //songObject1 = (i+1) + ' of ' + totalSongs + '<br>' + 'Track: ' + trackName + '<br>' + 'Artist: ' + artistName + '<br>' + 'Album: '+ albumName + '<br>' + 'Date Added: ' + dateAdded + '<br>' + 'Duration: ' + songDuration + '<br>' + 'Popularity: ' + songPopularity + '<br>' + 'Link: ' +  "<a href=" + songLink + ">link</a>" + '<br><br>'
 
-                  console.log(i)
-                  $('#test-output').append(songObject)
+                  //$('#test-output').append(songObject1)//prints to screen
+
+                  songObject = {songPopularity: songPopularity, trackID: trackID, trackName: trackName, artistName: artistName, albumName: albumName, dateAdded: dateAdded, songDuration: songDuration, songLink: songLink}
+                  songListArray.push(songObject)
 
                 }
 
 
-
-
-
-
-                  //var testObject = {totalSongs: (response.total), trackName: JSON.parse(trackName), artistName: JSON.parse(artistName), albumName: JSON.parse(albumName), dateAdded: JSON.parse(dateAdded), songDuration: [songDuration], songPopularity: [songPopularity], songLink: [songLink]}
-
-                  //console.log(testObject)
-
-
-
                }
-             });
+
+             });//end of ajax call 1
+
+
+             $.ajax({
+                  url: 'https://api.spotify.com/v1/me/tracks?offset=50&limit=50',
+                  headers: {
+                      'Authorization': 'Bearer ' + access_token
+                  },
+                  success: function(response) {
+                    //console.log(response)
+
+                    for(var i = 0; i < 50; i++){
+                     var trackIDFull = response.items[i].track.uri,
+                     trackID = trackIDFull.substring(14),
+                     trackName = response.items[i].track.name,
+                     artistName = response.items[i].track.album.artists[0].name,
+                     albumName = response.items[i].track.album.name,
+                     dateAdded = response.items[i].added_at,
+                     songDuration_ms = response.items[i].track.duration_ms,
+                     songDuration_s = ((songDuration_ms % 60000)/1000).toFixed(0),
+                     songDuration_m = Math.floor(songDuration_ms/1000/60),
+                     songDuration =  (songDuration_s == 60 ? (songDuration_m + 1) + ":00" : songDuration_m + ":" + (songDuration_s < 10 ? '0' : '') + songDuration_s),//creates human readable time, and manually adds "0" in :09, and turns ":60" into +1 minute
+                     songPopularity = response.items[i].track.popularity,
+                     songLink = response.items[i].track.external_urls.spotify,
+                     songObject = (i+1) + ' of ' + totalSongs + '<br>' + 'Track: ' + trackName + '<br>' + 'Artist: ' + artistName + '<br>' + 'Album: '+ albumName + '<br>' + 'Date Added: ' + dateAdded + '<br>' + 'Duration: ' + songDuration + '<br>' + 'Popularity: ' + songPopularity + '<br>' + 'Link: ' +  "<a href=" + songLink + ">link</a>" + '<br><br>'
+
+                     songObject = {songPopularity: songPopularity, trackID: trackID, trackName: trackName, artistName: artistName, albumName: albumName, dateAdded: dateAdded, songDuration: songDuration, songLink: songLink}
+                     songListArray.push(songObject)
+                     //$('#test-output').append(songObject2)//prints to screen
+                   }
+                     //console.log(songListArray)
+                  }
+                });//end of ajax call 2
+
           document.getElementById('obtain-new-token').addEventListener('click', function() {
             $.ajax({
               url: '/refresh_token',
@@ -190,11 +214,11 @@
             });
           }, false);
         }
-      })();
     </script>
 
     <script>
-
+    console.log(songListArray)
+    console.log(totalSongs)//need to fix this
     </script>
   </body>
 </html>
