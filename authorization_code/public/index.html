@@ -16,7 +16,7 @@
       #test-output{
         display: block;
         width:100%;
-        height: 200px;
+        height: auto;
         background-color: red;
         color: black;
       }
@@ -131,7 +131,7 @@
           }
           //test
           $.ajax({
-               url: 'https://api.spotify.com/v1/me/tracks/',
+               url: 'https://api.spotify.com/v1/me/tracks?offset=0&limit=20',
                headers: {
                    'Authorization': 'Bearer ' + access_token
                },
@@ -140,21 +140,28 @@
 
                  var counter = 0
                  //$('#test-output').html(JSON.stringify(response.items[counter].track.duration_ms))
-                 var totalSongs = response.total,
-                  trackName = response.items[counter].track.name,
-                  artistName = response.items[counter].track.album.artists[0].name,
-                  albumName = response.items[counter].track.album.name,
-                  dateAdded = response.items[counter].added_at,
-                  songDuration_ms = response.items[counter].track.duration_ms,
+
+
+
+                 for(var i = 0; i < 10; i++){
+                  var totalSongs = response.total,
+                  trackName = response.items[i].track.name,
+                  artistName = response.items[i].track.album.artists[0].name,
+                  albumName = response.items[i].track.album.name,
+                  dateAdded = response.items[i].added_at,
+                  songDuration_ms = response.items[i].track.duration_ms,
                   songDuration_s = ((songDuration_ms % 60000)/1000).toFixed(0),
                   songDuration_m = Math.floor(songDuration_ms/1000/60),
                   songDuration =  (songDuration_s == 60 ? (songDuration_m + 1) + ":00" : songDuration_m + ":" + (songDuration_s < 10 ? '0' : '') + songDuration_s),//creates human readable time, and manually adds "0" in :09, and turns ":60" into +1 minute
-                  songPopularity = response.items[counter].track.popularity,
-                  songLink = response.items[counter].track.external_urls.spotify,
-                  songObject = counter += 1 + ' of ' + totalSongs + '<br>' + 'Track: ' + trackName + '<br>' + 'Artist: ' + artistName + '<br>' + 'Album: '+ albumName + '<br>' + 'Date Added: ' + dateAdded + '<br>' + 'Duration: ' + songDuration + '<br>' + 'Popularity: ' + songPopularity + '<br>' + 'Link: ' +  "<a href=" + songLink + ">link</a>"
+                  songPopularity = response.items[i].track.popularity,
+                  songLink = response.items[i].track.external_urls.spotify,
+                  songObject = (i+1) + ' of ' + totalSongs + '<br>' + 'Track: ' + trackName + '<br>' + 'Artist: ' + artistName + '<br>' + 'Album: '+ albumName + '<br>' + 'Date Added: ' + dateAdded + '<br>' + 'Duration: ' + songDuration + '<br>' + 'Popularity: ' + songPopularity + '<br>' + 'Link: ' +  "<a href=" + songLink + ">link</a>" + '<br><br>'
 
+                  console.log(i)
+                  $('#test-output').append(songObject)
 
-                  $('#test-output').html(songObject)
+                }
+
 
 
 
